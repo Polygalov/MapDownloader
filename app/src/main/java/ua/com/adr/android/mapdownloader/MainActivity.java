@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String[] myDataset = {"Africa", "Asia", "Australia"};
+        String[] myDataset = {"Africa", "Asia", "Australia and Oceania", "Central America", "Europe", "North America", "Russia"};
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
@@ -26,5 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
         mAdapter = new MyAdapter(myDataset);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(
+                getApplicationContext()
+        ));
     }
 }
