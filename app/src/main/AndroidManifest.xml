@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest package="ua.com.adr.android.mapdownloader"
           xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
@@ -16,6 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".CountryActivity">
+        </activity>
+        <activity android:name=".AreasActivity">
         </activity>
     </application>
 
