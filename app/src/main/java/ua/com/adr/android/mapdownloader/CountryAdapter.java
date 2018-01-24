@@ -15,43 +15,40 @@ public class CountryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final int FRANCE = 7;
     private static final int GERMANY = 8;
     private static final int ITALY = 11;
-    private String[] mDataset;
+    private int[] mDataset;
     int thisRegion;
 
 
     public static class HolderFirstType extends RecyclerView.ViewHolder {
         public TextView mTextView;
+
         public HolderFirstType(View v) {
             super(v);
             mTextView = (TextView) v.findViewById(R.id.tv_recycler_item);
         }
     }
 
-    public static class HolderZeroType extends RecyclerView.ViewHolder
-    {
+    public static class HolderZeroType extends RecyclerView.ViewHolder {
         public TextView mTextView;
-        public HolderZeroType(View v)
-        {
+
+        public HolderZeroType(View v) {
             super(v);
             mTextView = (TextView) v.findViewById(R.id.tv_recycler_item);
         }
     }
 
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public CountryAdapter(String[] myDataset, int region) {
+    public CountryAdapter(int[] myDataset, int region) {
         mDataset = myDataset;
         thisRegion = region;
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                        int viewType) {
+                                                      int viewType) {
         RecyclerView.ViewHolder vh = null;
         View itemLayoutView;
 
-        switch (viewType)
-        {
+        switch (viewType) {
             case 0:
                 itemLayoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item_countries, parent, false);
                 vh = new HolderZeroType(itemLayoutView);
@@ -67,16 +64,15 @@ public class CountryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-        switch (this.getItemViewType(position))
-        {
+        switch (this.getItemViewType(position)) {
             case 0:
                 HolderZeroType zero = (HolderZeroType) holder;
-                zero.mTextView.setText(mDataset[position]);
+                zero.mTextView.setText(zero.itemView.getContext().getResources().getString(mDataset[position]));
                 break;
             case 1:
                 HolderFirstType first = (HolderFirstType) holder;
-                first.mTextView.setText(mDataset[position]);
-                first.mTextView.setOnClickListener (new View.OnClickListener() {
+                first.mTextView.setText(first.itemView.getContext().getResources().getString(mDataset[position]));
+                first.mTextView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(v.getContext(), AreasActivity.class);
@@ -87,7 +83,6 @@ public class CountryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 });
                 break;
         }
-
     }
 
     @Override

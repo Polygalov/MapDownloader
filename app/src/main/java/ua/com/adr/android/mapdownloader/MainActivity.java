@@ -24,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String[] myDataset = {"Africa", "Asia", "Australia and Oceania", "Central America", "Europe", "North America", "Russia"};
+        Regions mRegions = new Regions();
+        int[] myDataset = mRegions.allRegions;
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override public void onLongItemClick(View view, int position) {
-                        // do whatever
+
                     }
                 })
         );

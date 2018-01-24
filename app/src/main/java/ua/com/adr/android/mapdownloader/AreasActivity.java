@@ -35,12 +35,11 @@ public class AreasActivity extends AppCompatActivity implements AreasAdapter.Cli
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new AreasAdapter(regions.europeCountryList.get(thisCountry),this);
+        mAdapter = new AreasAdapter(regions.europeCountryList.get(thisCountry), this);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(
                 getApplicationContext()
         ));
-
     }
 
     @Override
@@ -52,7 +51,6 @@ public class AreasActivity extends AppCompatActivity implements AreasAdapter.Cli
             default:
                 return super.onOptionsItemSelected(item);
         }
-
     }
 
     @Override

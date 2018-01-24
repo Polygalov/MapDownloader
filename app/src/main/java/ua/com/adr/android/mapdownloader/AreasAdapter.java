@@ -1,5 +1,8 @@
 package ua.com.adr.android.mapdownloader;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,201 +20,196 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static android.view.View.GONE;
+
 /**
  * Created by Andy on 21.01.2018.
  */
- public class AreasAdapter extends RecyclerView.Adapter<AreasAdapter.ViewHolder> {
-    private String[] mDataset;
+public class AreasAdapter extends RecyclerView.Adapter<AreasAdapter.ViewHolder> {
+    private int[] mDataset;
     private static ClickListener clickListener;
 
 
     public interface ClickListener {
         void onItemClick(int position, View v);
+
         void onItemLongClick(int position, View v);
     }
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-            // each data item is just a string in this case
-            ImageView ivDownload, ivFlag;
-            TextView mTextView;
-            ProgressBar mProgressBar;
-            boolean isDownload = false;
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        // each data item is just a string in this case
+        ImageView ivDownload, ivFlag;
+        TextView mTextView;
+        ProgressBar mProgressBar;
+        boolean isDownload = false;
+        DownloadFileFromURL ddl;
 
-            Regions regions = new Regions();
-            public ViewHolder(View v) {
-                super(v);
-                ivDownload = (ImageView) itemView.findViewById(R.id.iv_download);
-                ivFlag = (ImageView) itemView.findViewById(R.id.iv_flag);
-                mTextView = (TextView) v.findViewById(R.id.tv_recycler_item);
-                mProgressBar = (ProgressBar) v.findViewById(R.id.progressBar);
-                mProgressBar.setVisibility(v.GONE);
-                ivDownload.setOnClickListener(this);
-            }
+        Regions regions = new Regions();
+
+        public ViewHolder(View v) {
+            super(v);
+            ddl = new DownloadFileFromURL();
+            ivDownload = (ImageView) itemView.findViewById(R.id.iv_download);
+            ivFlag = (ImageView) itemView.findViewById(R.id.iv_flag);
+            mTextView = (TextView) v.findViewById(R.id.tv_recycler_item);
+            mProgressBar = (ProgressBar) v.findViewById(R.id.progressBar);
+            mProgressBar.setVisibility(GONE);
+            ivDownload.setOnClickListener(this);
+        }
 
         @Override
         public void onClick(View v) {
-            if (clickListener!=null){
+            if (clickListener != null) {
                 clickListener.onItemClick(getLayoutPosition(), v);
-                if (isDownload){
 
+                if (isDownload) {
                     isDownload = false;
+                    ddl.cancel(false);
                 } else {
+                    ddl = new DownloadFileFromURL();
                     mProgressBar.setVisibility(v.VISIBLE);
                     ivDownload.setImageResource(R.drawable.ic_action_remove_dark);
-                    downloadFile(regions.germanyLinks[getLayoutPosition()], v, mProgressBar, ivFlag);
+                    ddl.execute(regions.germanyLinks[getLayoutPosition()], mProgressBar, ivDownload, ivFlag);
+                    isDownload = true;
                 }
             }
         }
-
-        void setIconToDownload() {
-            ivDownload.setImageResource(R.drawable.ic_action_remove_dark);
-        }
     }
 
-        // Provide a suitable constructor (depends on the kind of dataset)
-        public AreasAdapter(String[] myDataset, ClickListener clickListener) {
-            mDataset = myDataset;
-            setOnItemClickListener(clickListener);
-        }
+    public AreasAdapter(int[] myDataset, ClickListener clickListener) {
+        mDataset = myDataset;
+        setOnItemClickListener(clickListener);
+    }
 
-        // Create new views (invoked by the layout manager)
-        @Override
-        public AreasAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//            RecyclerView.ViewHolder vh = null;
-//            View itemLayoutView;
+    @Override
+    public AreasAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            // create a new view
-            View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recycler_item_download, parent, false);
-           //  set the view's size, margins, paddings and layout parameters
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.recycler_item_download, parent, false);
 
-            AreasAdapter.ViewHolder vh = new AreasAdapter.ViewHolder(v);
-            return vh;
-        }
+        AreasAdapter.ViewHolder vh = new AreasAdapter.ViewHolder(v);
+        return vh;
+    }
 
-        // Replace the contents of a view (invoked by the layout manager)
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
 
-                holder.mTextView.setText(mDataset[position]);
+        holder.mTextView.setText(holder.itemView.getContext().getResources().getString(mDataset[position]));
 
 
-        }
+    }
 
-        // Return the size of your dataset (invoked by the layout manager)
-        @Override
-        public int getItemCount() {
-            return mDataset.length;
-        }
+
+    @Override
+    public int getItemCount() {
+        return mDataset.length;
+    }
 
 
     public void setOnItemClickListener(ClickListener clickListener) {
         this.clickListener = clickListener;
     }
 
-    
-     static void downloadFile(String url, final View v, final ProgressBar mPB, final ImageView ivFlag) {
-//        final ProgressDialog progressDialog = new ProgressDialog(v.getContext());
+    class DownloadFileFromURL extends AsyncTask<Object, Integer, File> {
 
-        new AsyncTask<String, Integer, File>() {
-            private Exception m_error = null;
+        private Exception m_error = null;
+        ProgressBar progressBar;
+        ImageView atIvDownload;
+        ImageView atIvFlag;
+        View v;
 
-            @Override
-            protected void onPreExecute() {
-//                View v = LayoutInflater.from(parent.getContext())
-//                        .inflate(R.layout.recycler_item_download, parent, false);
-//                progressDialog.setMessage("Downloading ...");
-//                progressDialog.setCancelable(true);
-//                progressDialog.setMax(100);
-//                progressDialog
-//                        .setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//
-//                progressDialog.show();
-                mPB.setProgress((int) (0));
-            }
 
-            @Override
-            protected File doInBackground(String... params) {
-                URL url;
-                HttpURLConnection urlConnection;
-                InputStream inputStream;
-                int totalSize;
-                int downloadedSize;
-                byte[] buffer;
-                int bufferLength;
+        @Override
+        protected void onPreExecute() {
 
-                File file = null;
-                FileOutputStream fos = null;
+        }
 
-                try {
-                    url = new URL(params[0]);
-                    urlConnection = (HttpURLConnection) url.openConnection();
+        @Override
+        protected File doInBackground(Object... params) {
+            URL url;
+            HttpURLConnection urlConnection;
+            InputStream inputStream;
+            int totalSize;
+            int downloadedSize;
+            byte[] buffer;
+            int bufferLength;
 
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.setDoOutput(true);
-                    urlConnection.connect();
+            File file = null;
+            FileOutputStream fos = null;
 
-                    file = File.createTempFile("Mustachify", "download");
-                    fos = new FileOutputStream(file);
-                    inputStream = urlConnection.getInputStream();
+            try {
+                url = new URL((String) params[0]);
+                progressBar = (ProgressBar) params[1];
+                atIvDownload = (ImageView) params[2];
+                atIvFlag = (ImageView) params[3];
+                urlConnection = (HttpURLConnection) url.openConnection();
 
-                    totalSize = urlConnection.getContentLength();
-                    downloadedSize = 0;
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setDoOutput(true);
+                urlConnection.connect();
 
-                    buffer = new byte[1024];
-                    bufferLength = 0;
+                file = File.createTempFile("Map", "download");
+                fos = new FileOutputStream(file);
+                inputStream = urlConnection.getInputStream();
 
-                    // читаем со входа и пишем в выход,
-                    // с каждой итерацией публикуем прогресс
-                    while ((bufferLength = inputStream.read(buffer)) > 0) {
-                        fos.write(buffer, 0, bufferLength);
-                        downloadedSize += bufferLength;
-                        publishProgress(downloadedSize, totalSize);
-                    }
+                totalSize = urlConnection.getContentLength();
+                downloadedSize = 0;
 
-                    fos.close();
-                    inputStream.close();
+                buffer = new byte[1024];
+                bufferLength = 0;
 
-                    return file;
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                    m_error = e;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    m_error = e;
+                // читаем со входа и пишем в выход,
+                // с каждой итерацией публикуем прогресс
+                while ((bufferLength = inputStream.read(buffer)) > 0) {
+                    if (isCancelled())
+                        return null;
+                    fos.write(buffer, 0, bufferLength);
+                    downloadedSize += bufferLength;
+                    publishProgress(downloadedSize, totalSize);
                 }
 
-                return null;
+                fos.close();
+                inputStream.close();
+
+                return file;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                m_error = e;
+            } catch (IOException e) {
+                e.printStackTrace();
+                m_error = e;
             }
 
-            // обновляем progressDialog
-            protected void onProgressUpdate(Integer... values) {
-               // progressDialog
-                mPB.setProgress((int) ((values[0] / (float) values[1]) * 100));
-            };
+            return null;
+        }
 
-            public void downloadFile(){
-                this.download = false;
+        protected void onProgressUpdate(Integer... values) {
+            progressBar.setProgress((int) ((values[0] / (float) values[1]) * 100));
+        }
+
+        ;
+
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            progressBar.setVisibility(GONE);
+            atIvDownload.setImageResource(R.drawable.ic_action_import);
+        }
+
+        @Override
+        protected void onPostExecute(File file) {
+            if (m_error != null) {
+                m_error.printStackTrace();
+                return;
             }
 
-
-            @Override
-            protected void onPostExecute(File file) {
-                // отображаем сообщение, если возникла ошибка
-                if (m_error != null) {
-                    m_error.printStackTrace();
-                    return;
-                }
-                // закрываем прогресс и удаляем временный файл
-     //           progressDialog.hide();
-//                mPB.setVisibility(v.GONE);
-                new ViewHolder(v).setIconToDownload();
-                file.delete();
- //               ivFlag.setColorFilter(new PorterDuffColorFilter(0xffff00, PorterDuff.Mode.MULTIPLY));
-            }
-        }.execute(url);
+            progressBar.setVisibility(GONE);
+            atIvDownload.setImageResource(R.drawable.ic_action_import);
+            atIvFlag.setColorFilter(new PorterDuffColorFilter(Color.GREEN, PorterDuff.Mode.SRC_ATOP));
+            file.delete(); // удаляем файл в тестовом режиме!
+        }
     }
-
 
 }

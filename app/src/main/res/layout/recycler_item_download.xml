@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/progressBar"
             android:layout_weight="1"
-            android:progress="50"
+            android:progress="0"
             android:layout_marginRight="18dp"
             android:layout_marginLeft="23dp"
             android:layout_marginBottom="8dp"/>
