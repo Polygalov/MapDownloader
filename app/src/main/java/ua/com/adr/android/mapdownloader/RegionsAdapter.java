@@ -11,7 +11,7 @@ import android.widget.TextView;
  */
 
 public class RegionsAdapter extends RecyclerView.Adapter<RegionsAdapter.ViewHolder> {
-    private int[] mDataset;
+    private String[] mDataset;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView mTextView;
@@ -22,7 +22,7 @@ public class RegionsAdapter extends RecyclerView.Adapter<RegionsAdapter.ViewHold
         }
     }
 
-    public RegionsAdapter(int[] myDataset) {
+    public RegionsAdapter(String[] myDataset) {
         mDataset = myDataset;
     }
 
@@ -38,7 +38,7 @@ public class RegionsAdapter extends RecyclerView.Adapter<RegionsAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mTextView.setText(holder.itemView.getContext().getResources().getString(mDataset[position]));
+        holder.mTextView.setText(mDataset[position]);
     }
 
     @Override
